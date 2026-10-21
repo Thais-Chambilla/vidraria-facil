@@ -1,15 +1,19 @@
 # Vidraria Fácil
 ## Objetivo
-
+criar um site onde o usuário vai utilizar a câmera para detectar imagens de vidrarias de laboratório, o usuário precisa habilitar o uso de câmera para tirar uma foto e o sistema retorna o tipo de vidraria com seus respectivos usos e etc.
 
 ### Stack Tecnlógico
 - Backend: PHP estruturado com sessões nativas
 - Banco de dados: MySQL (PDO para segurança)
 - Frontend: HTML5, PHP, CSS, Tailwind CSS
+- Huggingface para criação de um motor de inteligência artificial de detecção de imagem
 
 #### Regras de negócio (CORE)
 - Tratar senhas de usuários com hash bcrypt
 - O sistema deve ter uma página de históricos e manter sempre os logs de qualquer alteração feita por qualquer usuário, para auditorias futuras.
+- um usuário no plano gratuito vai ter uma quantidade limitada de pesquisa, na qual o o adm do site pode configurar esse limite.
+- o usuário gratuito vai ter um limite menor de ver o historico. 
+- o usuário premium tem buscas mais amplas e um histórico completo de todo o periodo.
 
 
 ##### Regras Globais
