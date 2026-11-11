@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-slate-50 text-slate-800 antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vidraria Fácil - Demonstração Interativa Completa</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-panel { background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(12px); }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-slate-50 text-slate-800 pb-20 md:pb-0">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-400 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
+                    <i class="fa-solid fa-flask-vial text-lg"></i>
+                </div>
+                <div>
+                    <span class="font-extrabold text-lg text-slate-900 tracking-tight flex items-center gap-1.5">
+                        Vidraria Fácil
+                        <span class="px-1.5 py-0.5 text-[10px] uppercase font-bold tracking-wider bg-sky-100 text-sky-800 rounded-md">Live Demo</span>
+                    </span>
+                    <p class="text-[11px] text-slate-500 hidden sm:block -mt-1 font-medium">Reconhecimento Inteligente de Vidrarias</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div id="demo-user-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span id="demo-badge-text">Plano Free: <strong>5</strong> buscas hoje</span>
+                </div>
+                <button type="button" onclick="alternarPlanoDemo()" class="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-bold text-xs rounded-xl shadow transition">
+                    <i class="fa-solid fa-crown mr-1"></i> Alternar Free / Premium
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Container Toast -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full px-4 pointer-events-none"></div>
+
+    <!-- Modal Global -->
+    <div id="modal-global-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden transition-opacity">
+        <div id="modal-global-card" class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 p-6">
+            <h3 id="modal-global-title" class="text-lg font-bold text-slate-800"></h3>
+            <p id="modal-global-message" class="text-sm text-slate-600 mt-2 whitespace-pre-line"></p>
+            <div class="mt-6 flex justify-end gap-3">
+                <button id="modal-btn-cancelar" type="button" class="hidden px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancelar</button>
+                <button id="modal-btn-confirmar" type="button" class="px-5 py-2 rounded-xl text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 max-w-5xl mx-auto px-4 py-8 w-full space-y-10">
+
+        <!-- Banner com Seleção de Abas -->
+        <div class="flex items-center justify-center gap-3">
+            <button onclick="mudarAba('camera')" id="tab-btn-camera" class="px-5 py-2.5 rounded-2xl text-xs font-bold bg-sky-600 text-white shadow-md transition">
+                <i class="fa-solid fa-camera mr-1.5"></i> 1. Escanear por Câmera (IA)
+            </button>
+            <button onclick="mudarAba('filtro')" id="tab-btn-filtro" class="px-5 py-2.5 rounded-2xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-filter mr-1.5"></i> 2. Filtrar por Atributos
+            </button>
+            <button onclick="mudarAba('detalhes')" id="tab-btn-detalhes" class="px-5 py-2.5 rounded-2xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-book-open mr-1.5"></i> 3. Ficha Técnica Exemplo
+            </button>
+        </div>
+
+        <!-- ABA 1: CÂMERA & IA -->
+        <section id="aba-camera" class="space-y-6">
+            <div class="text-center max-w-xl mx-auto">
+                <h2 class="text-2xl font-black text-slate-900">Escanear Vidraria com a Câmera</h2>
+                <p class="text-xs text-slate-500 mt-1">Aponte a webcam/câmera ou selecione um arquivo de imagem</p>
+            </div>
+
+            <div class="relative bg-slate-900 rounded-3xl overflow-hidden shadow-2xl aspect-[4/3] sm:aspect-[16/10] flex items-center justify-center border-4 border-slate-800 max-w-2xl mx-auto">
+                <video id="v-demo" autoplay playsinline muted class="w-full h-full object-cover"></video>
+                <canvas id="c-demo" class="hidden"></canvas>
+                <img id="img-demo" class="w-full h-full object-contain hidden bg-slate-950">
+
+                <div id="mira-demo" class="absolute inset-0 pointer-events-none flex items-center justify-center p-8">
+                    <div class="w-64 h-64 border-2 border-dashed border-sky-400/70 rounded-3xl flex items-center justify-center">
+                        <span class="px-3 py-1 bg-slate-900/80 text-[11px] font-semibold text-cyan-300 rounded-full">
+                            Posicione a vidraria aqui
+                        </span>
+                    </div>
+                </div>
+
+                <div id="radar-demo" class="absolute inset-0 bg-slate-900/80 hidden flex-col items-center justify-center p-6 text-center z-20">
+                    <div class="w-16 h-16 rounded-full border-4 border-t-sky-500 border-r-transparent border-b-cyan-400 border-l-transparent animate-spin mb-3"></div>
+                    <h3 class="text-base font-bold text-white">Analisando com Hugging Face Vision...</h3>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-center gap-3">
+                <input type="file" id="f-demo" accept="image/*" class="hidden">
+                <button type="button" onclick="document.getElementById('f-demo').click()" class="px-5 py-3 bg-white border border-slate-200 text-slate-700 font-bold text-xs rounded-xl shadow-sm hover:bg-slate-50 transition">
+                    <i class="fa-solid fa-images text-sky-600 mr-1.5"></i> Carregar da Galeria
+                </button>
+                <button type="button" onclick="tirarFotoDemo()" class="px-7 py-3.5 bg-gradient-to-r from-sky-600 to-cyan-500 text-white font-black text-xs rounded-xl shadow-lg shadow-sky-500/25 transition">
+                    <i class="fa-solid fa-camera mr-1.5"></i> Tirar Foto e Identificar
+                </button>
+                <button type="button" id="btn-retake-demo" onclick="reiniciarCamDemo()" class="px-5 py-3 bg-slate-100 text-slate-700 font-bold text-xs rounded-xl hidden transition">
+                    Nova Foto
+                </button>
+            </div>
+
+            <!-- Card de Resultado -->
+            <div id="res-box-demo" class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xl max-w-2xl mx-auto hidden">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <span class="px-2.5 py-1 text-[11px] font-black uppercase bg-emerald-100 text-emerald-800 rounded-lg">
+                        <i class="fa-solid fa-check mr-1"></i> Vidraria Reconhecida
+                    </span>
+                    <span id="res-conf-demo" class="text-xs font-bold text-sky-700">Confiança: 98.4%</span>
+                </div>
+                <div class="mt-4 flex gap-4 items-center">
+                    <img id="res-img-demo" src="assets/img/image41.jpeg" class="w-24 h-24 object-contain rounded-2xl bg-slate-50 p-2 border">
+                    <div>
+                        <h3 id="res-nome-demo" class="text-xl font-black text-slate-900">Balão de Fundo Redondo</h3>
+                        <p class="text-xs text-slate-400 font-mono">round-bottom flask &bull; Borossilicato 3.3</p>
+                    </div>
+                </div>
+                <div class="mt-4 space-y-2">
+                    <div class="p-3 bg-sky-50 rounded-xl text-xs text-slate-700">
+                        <strong>Para que serve:</strong> <span id="res-funcao-demo">Usado para aquecimento uniforme de misturas e destilações.</span>
+                    </div>
+                    <div class="p-3 bg-amber-50 rounded-xl text-xs text-amber-900">
+                        <strong>Dica de Segurança:</strong> <span id="res-seg-demo">Usar mantas aquecedoras e suporte com garras; verificar trincas antes do fogo.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 2: FILTRO DE ATRIBUTOS -->
+        <section id="aba-filtro" class="hidden space-y-6">
+            <div class="text-center max-w-xl mx-auto">
+                <h2 class="text-2xl font-black text-slate-900">Filtrar por Atributos Físicos</h2>
+                <p class="text-xs text-slate-500 mt-1">Busca guiada por fundo, gargalo e finalidade</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white p-6 rounded-3xl border border-slate-200">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Formato do Fundo</label>
+                    <select id="sel-fundo-demo" onchange="filtrarDemo()" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs font-semibold">
+                        <option value="">Todos</option>
+                        <option value="Redondo">Fundo Redondo</option>
+                        <option value="Plano">Fundo Plano</option>
+                        <option value="Cônico">Fundo Cônico</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tipo de Gargalo</label>
+                    <select id="sel-gargalo-demo" onchange="filtrarDemo()" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs font-semibold">
+                        <option value="">Todos</option>
+                        <option value="Estreito">Gargalo Estreito</option>
+                        <option value="Largo">Boca Larga</option>
+                        <option value="Esmerilhado">Gargalo Esmerilhado</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Finalidade</label>
+                    <select id="sel-cat-demo" onchange="filtrarDemo()" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs font-semibold">
+                        <option value="">Todas</option>
+                        <option value="Aquecimento">Aquecimento</option>
+                        <option value="Reação">Reação</option>
+                        <option value="Medição">Medição</option>
+                        <option value="Separação">Separação</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="grid-filtro-demo" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+        </section>
+
+        <!-- ABA 3: DETALHES -->
+        <section id="aba-detalhes" class="hidden space-y-6">
+            <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-xl max-w-3xl mx-auto space-y-6">
+                <div class="flex items-center gap-6">
+                    <img src="assets/img/image41.jpeg" class="w-36 h-36 object-contain rounded-2xl bg-slate-50 p-2 border">
+                    <div>
+                        <span class="px-2.5 py-1 text-[10px] font-bold uppercase bg-sky-100 text-sky-800 rounded-md">Aquecimento</span>
+                        <h2 class="text-3xl font-black text-slate-900 mt-1">Balão de Fundo Redondo</h2>
+                        <p class="text-xs text-slate-400 font-mono">round-bottom flask &bull; Borossilicato 3.3</p>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-sky-50 rounded-2xl text-xs text-slate-700 leading-relaxed">
+                    <h4 class="font-bold text-sky-950 uppercase mb-1">Para que serve:</h4>
+                    Usado para aquecimento uniforme de líquidos, misturas e reações químicas em geral. Essencial para processos de destilação simples e fracionada, refluxo e reações sob aquecimento.
+                </div>
+
+                <div class="p-4 bg-amber-50 rounded-2xl border-2 border-amber-300 text-xs text-amber-950 leading-relaxed">
+                    <h4 class="font-bold text-amber-900 uppercase mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Normas de Segurança & Prevenção Primária:
+                    </h4>
+                    Verificar trincas ou microfissuras antes de submeter ao fogo. Utilizar obrigatoriamente suportes universais com garras e mantas aquecedoras reguladas (nunca apoiar diretamente em superfícies planas sem anel de cortiça).
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+    // Catálogo mock para demonstração interativa
+    const vidrariasDemo = [
+        { id: 1, nome: 'Balão de Fundo Redondo', fundo: 'Redondo', gargalo: 'Estreito', cat: 'Aquecimento', foto: 'assets/img/image41.jpeg', desc: 'Aquecimento uniforme de líquidos e destilações.', seg: 'Verificar trincas e utilizar manta aquecedora com garras.' },
+        { id: 2, nome: 'Balão de Fundo Plano', fundo: 'Plano', gargalo: 'Estreito', cat: 'Aquecimento', foto: 'assets/img/image22.png', desc: 'Aquecimento brando e repouso em bancada.', seg: 'Usar tela de amianto; não indicado para vácuo severo.' },
+        { id: 3, nome: 'Béquer (Copo de Becker)', fundo: 'Plano', gargalo: 'Largo', cat: 'Reação', foto: 'assets/img/image28.png', desc: 'Dissolução, misturas e aquecimento com tela.', seg: 'Graduação aproximada; manusear com pinça térmica.' },
+        { id: 4, nome: 'Erlenmeyer', fundo: 'Plano', gargalo: 'Estreito', cat: 'Reação', foto: 'assets/img/image29.png', desc: 'Agitação de líquidos sem respingos externos e titulações.', seg: 'Aliviar pressão periódica ao agitar solventes voláteis.' },
+        { id: 5, nome: 'Proveta Graduada', fundo: 'Plano', gargalo: 'Largo', cat: 'Medição', foto: 'assets/img/image21.png', desc: 'Medição de volumes de líquidos com precisão média.', seg: 'NUNCA aquecer na chama direta; leitura na base do menisco.' },
+        { id: 6, nome: 'Pipeta Volumétrica', fundo: 'Cônico', gargalo: 'Estreito', cat: 'Medição', foto: 'assets/img/image23.png', desc: 'Transferência de volume único rigorosamente calibrado.', seg: 'JAMAIS pipetar com a boca! Uso obrigatório de pera de borracha.' },
+        { id: 7, nome: 'Bureta', fundo: 'Cônico', gargalo: 'Estreito', cat: 'Medição', foto: 'assets/img/image25.png', desc: 'Escoamento rigorosamente controlado para titulações.', seg: 'Eliminar bolhas de ar abaixo da torneira antes da volumetria.' },
+        { id: 8, nome: 'Condensador de Liebig', fundo: 'Cilíndrico', gargalo: 'Esmerilhado', cat: 'Separação', foto: 'assets/img/image6.png', desc: 'Condensação de vapores em destilações.', seg: 'Entrada de água de refrigeração sempre na parte inferior.' }
+    ];
+
+    let planoAtual = 'gratuito';
+    let buscasRestantes = 5;
+
+    function alternarPlanoDemo() {
+        if (planoAtual === 'gratuito') {
+            planoAtual = 'premium';
+            document.getElementById('demo-badge-text').innerHTML = '<i class="fa-solid fa-crown text-amber-500 mr-1"></i> Premium: Buscas Ilimitadas!';
+            mostrarToast('sucesso', 'Plano Premium Ativado!', 'Você agora tem buscas e histórico vitalício ilimitados.');
+        } else {
+            planoAtual = 'gratuito';
+            buscasRestantes = 5;
+            document.getElementById('demo-badge-text').innerHTML = 'Plano Free: <strong>' + buscasRestantes + '</strong> buscas hoje';
+            mostrarToast('info', 'Plano Gratuito', 'Plano alterado para Gratuito com cota diária de 5 buscas.');
+        }
+    }
+
+    function mudarAba(aba) {
+        ['camera', 'filtro', 'detalhes'].forEach(a => {
+            document.getElementById('aba-' + a).classList.add('hidden');
+            document.getElementById('tab-btn-' + a).className = 'px-5 py-2.5 rounded-2xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition';
+        });
+        document.getElementById('aba-' + aba).classList.remove('hidden');
+        document.getElementById('tab-btn-' + aba).className = 'px-5 py-2.5 rounded-2xl text-xs font-bold bg-sky-600 text-white shadow-md transition';
+    }
+
+    function mostrarToast(tipo, titulo, msg) {
+        const c = document.getElementById('toast-container');
+        const t = document.createElement('div');
+        t.className = 'p-4 rounded-xl shadow-xl bg-slate-900 text-white text-xs font-semibold flex items-center gap-2 pointer-events-auto transition';
+        t.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i><div><strong class="block">${titulo}</strong><span>${msg}</span></div>`;
+        c.appendChild(t);
+        setTimeout(() => t.remove(), 4000);
+    }
+
+    function abrirModal(opcoes) {
+        document.getElementById('modal-global-title').textContent = opcoes.titulo;
+        document.getElementById('modal-global-message').textContent = opcoes.mensagem;
+        document.getElementById('modal-global-overlay').classList.remove('hidden');
+        document.getElementById('modal-btn-confirmar').onclick = () => {
+            document.getElementById('modal-global-overlay').classList.add('hidden');
+            if (opcoes.onConfirm) opcoes.onConfirm();
+        };
+    }
+
+    // Inicialização da Câmera
+    const video = document.getElementById('v-demo');
+    async function startCam() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            video.srcObject = stream;
+        } catch (e) {
+            console.log('Câmera indisponível no browser:', e);
+        }
+    }
+
+    function tirarFotoDemo() {
+        if (planoAtual === 'gratuito' && buscasRestantes <= 0) {
+            abrirModal({
+                titulo: 'Limite Diário Atingido (Regra CORE)',
+                mensagem: 'Você atingiu o limite de 5 pesquisas gratuitas hoje configurado pelo administrador.\n\nDeseja alternar para o Plano Premium?',
+                onConfirm: alternarPlanoDemo
+            });
+            return;
+        }
+
+        if (planoAtual === 'gratuito') {
+            buscasRestantes--;
+            document.getElementById('demo-badge-text').innerHTML = 'Plano Free: <strong>' + buscasRestantes + '</strong> buscas hoje';
+        }
+
+        document.getElementById('radar-demo').classList.remove('hidden');
+
+        setTimeout(() => {
+            document.getElementById('radar-demo').classList.add('hidden');
+            document.getElementById('res-box-demo').classList.remove('hidden');
+            mostrarToast('sucesso', 'Reconhecimento IA Concluído', 'Vidraria identificada com 98.4% de precisão.');
+        }, 1200);
+    }
+
+    function reiniciarCamDemo() {
+        document.getElementById('res-box-demo').classList.add('hidden');
+    }
+
+    function filtrarDemo() {
+        const f = document.getElementById('sel-fundo-demo').value;
+        const g = document.getElementById('sel-gargalo-demo').value;
+        const c = document.getElementById('sel-cat-demo').value;
+
+        const grid = document.getElementById('grid-filtro-demo');
+        grid.innerHTML = '';
+
+        const filtradas = vidrariasDemo.filter(item => {
+            if (f && item.fundo !== f) return false;
+            if (g && item.gargalo !== g) return false;
+            if (c && item.cat !== c) return false;
+            return true;
+        });
+
+        if (filtradas.length === 0) {
+            grid.innerHTML = '<div class="col-span-3 text-center p-8 bg-white rounded-2xl text-xs text-slate-400">Nenhuma vidraria encontrada para estes atributos.</div>';
+            return;
+        }
+
+        filtradas.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between';
+            el.innerHTML = `
+                <div>
+                    <span class="text-[10px] font-bold uppercase bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${item.cat}</span>
+                    <img src="${item.foto}" class="w-24 h-24 object-contain mx-auto my-2" onerror="this.src='assets/img/image41.jpeg'">
+                    <h4 class="font-bold text-sm text-slate-900">${item.nome}</h4>
+                    <p class="text-[11px] text-slate-500 mt-1">${item.desc}</p>
+                </div>
+                <button type="button" onclick="mudarAba('detalhes')" class="mt-3 w-full py-1.5 bg-sky-50 text-sky-700 hover:bg-sky-600 hover:text-white rounded-xl text-xs font-bold transition">
+                    Ver Ficha Técnica
+                </button>
+            `;
+            grid.appendChild(el);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        startCam();
+        filtrarDemo();
+    });
+    </script>
+</body>
+</html>
